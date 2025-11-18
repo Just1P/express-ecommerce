@@ -24,6 +24,13 @@ class CreateOrderDummyRepository implements CreateOrderRepository {
         price: this.productPrice,
       });
     }
+    if (productId === 2) {
+      return new Product({
+        title: "PS5",
+        description: "console Sony",
+        price: 40,
+      });
+    }
     return null;
   }
 
@@ -111,5 +118,23 @@ describe("US-3 : Créer une commande avec des produits", () => {
       })
       // Alors une erreur doit être envoyée "Le produit n'existe pas"
     ).rejects.toThrow("Le produit n'existe pas");
+  });
+
+  test("Scénario 6 : remplacement d'une commande existante", async () => {
+    // Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 30€
+    // Et qu'un produit existe avec l'identifiant 2, titre "PS5", description "console Sony" et prix 40€
+    // Et qu'une commande existe déjà avec le produit 1, quantité 2 et prix total 60€
+    const createOrderRepository = new CreateOrderDummyRepository(30);
+    const createOrderUseCase = new CreateOrderUseCase(createOrderRepository);
+
+    await expect(
+      // Quand je crée une nouvelle commande avec le produit d'identifiant 2 et une quantité de 3
+      createOrderUseCase.execute({
+        productId: 2,
+        quantity: 3,
+      })
+      // Alors l'ancienne commande doit être supprimée
+      // Et la nouvelle commande doit être créée avec le produit 2, quantité 3 et prix total 120€
+    ).resolves.not.toThrow();
   });
 });
