@@ -35,7 +35,7 @@ export class Order {
 
   private validateTotalPrice(totalPrice: number) {
     if (totalPrice > 200) {
-      throw new Error("Le prix total de la commande ne peut pas dépasser 200¬");
+      throw new Error("Le prix total de la commande ne peut pas dÃ©passer 200â‚¬");
     }
   }
 

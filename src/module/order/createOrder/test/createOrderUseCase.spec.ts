@@ -5,6 +5,12 @@ import { Order } from "../../Order";
 import { Product } from "../../../product/Product";
 
 class CreateOrderDummyRepository implements CreateOrderRepository {
+  private productPrice: number;
+
+  constructor(productPrice: number = 50) {
+    this.productPrice = productPrice;
+  }
+
   async save(order: Order): Promise<void> {
     // Ne fait rien, c'est un dummy
   }
@@ -15,7 +21,7 @@ class CreateOrderDummyRepository implements CreateOrderRepository {
       return new Product({
         title: "Switch 2",
         description: "nouvelle console",
-        price: 50,
+        price: this.productPrice,
       });
     }
     return null;
@@ -41,5 +47,21 @@ describe("US-3 : Créer une commande avec des produits", () => {
       })
       // Alors la commande doit être créée avec succès
     ).resolves.not.toThrow();
+  });
+
+  test("Scénario 2 : création échouée, prix total dépasse 200€", async () => {
+    // Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 120€
+    // Et qu'il n'y a aucune commande enregistrée
+    const createOrderRepository = new CreateOrderDummyRepository(120);
+    const createOrderUseCase = new CreateOrderUseCase(createOrderRepository);
+
+    await expect(
+      // Quand je crée une commande avec le produit d'identifiant 1 et une quantité de 3
+      createOrderUseCase.execute({
+        productId: 1,
+        quantity: 3,
+      })
+      // Alors une erreur doit être envoyée "Le prix total de la commande ne peut pas dépasser 200€"
+    ).rejects.toThrow("Le prix total de la commande ne peut pas dépasser 200€");
   });
 });
