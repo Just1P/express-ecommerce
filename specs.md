@@ -106,8 +106,6 @@ Règles métiers :
     - Et qu'il n'y a aucune commande enregistrée
     - Quand je crée une commande avec le produit d'identifiant 1 et une quantité de 2
     - Alors la commande doit être créée avec succès
-    - Et le prix total doit être de 100€
-    - Et la date de création doit être celle d'aujourd'hui
 
   - Exemple 2/ Scénario 2 : création échouée, prix total dépasse 200€
 
