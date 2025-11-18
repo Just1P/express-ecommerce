@@ -96,4 +96,20 @@ describe("US-3 : Créer une commande avec des produits", () => {
       // Alors une erreur doit être envoyée "La quantité doit être supérieure à 0"
     ).rejects.toThrow("La quantité doit être supérieure à 0");
   });
+
+  test("Scénario 5 : création échouée, produit inexistant", async () => {
+    // Étant donné qu'aucun produit n'existe avec l'identifiant 999
+    // Et qu'il n'y a aucune commande enregistrée
+    const createOrderRepository = new CreateOrderDummyRepository();
+    const createOrderUseCase = new CreateOrderUseCase(createOrderRepository);
+
+    await expect(
+      // Quand je crée une commande avec le produit d'identifiant 999 et une quantité de 2
+      createOrderUseCase.execute({
+        productId: 999,
+        quantity: 2,
+      })
+      // Alors une erreur doit être envoyée "Le produit n'existe pas"
+    ).rejects.toThrow("Le produit n'existe pas");
+  });
 });
