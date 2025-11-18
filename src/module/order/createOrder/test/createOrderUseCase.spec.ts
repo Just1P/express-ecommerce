@@ -64,4 +64,20 @@ describe("US-3 : Créer une commande avec des produits", () => {
       // Alors une erreur doit être envoyée "Le prix total de la commande ne peut pas dépasser 200€"
     ).rejects.toThrow("Le prix total de la commande ne peut pas dépasser 200€");
   });
+
+  test("Scénario 3 : création échouée, quantité supérieure ou égale à 4", async () => {
+    // Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 30€
+    // Et qu'il n'y a aucune commande enregistrée
+    const createOrderRepository = new CreateOrderDummyRepository(30);
+    const createOrderUseCase = new CreateOrderUseCase(createOrderRepository);
+
+    await expect(
+      // Quand je crée une commande avec le produit d'identifiant 1 et une quantité de 5
+      createOrderUseCase.execute({
+        productId: 1,
+        quantity: 5,
+      })
+      // Alors une erreur doit être envoyée "La quantité ne peut pas dépasser 3"
+    ).rejects.toThrow("La quantité ne peut pas dépasser 3");
+  });
 });
