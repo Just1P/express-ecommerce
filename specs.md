@@ -83,34 +83,73 @@ Règles métier :
 
 ## Order
 
-### US-3: Ajouter un produit à une commande
+### US-3: Créer une commande avec des produits
 
-En tant qu’utilisateur,  
-Je veux pouvoir ajouter un produit à une commande,  
-Afin de faire un achat
+En tant qu'utilisateur,
+Je veux créer une commande avec un produit et une quantité,
+Afin de recevoir la commande.
 
-Règles métier :
+Règles métiers :
 
-- max 3 produits par commande
-- max 100e par commande
-- max 2 fois le même produit
-- si commande existante : ajoute le produit dans la commande
-- si commande pas existante : créé le commande
-- si produit déjà dans la commande : incrémente la quantité
+- Prix par commande < 200€
+- Quantité de produit < 4
+- Quantité de produit > 0
+- Création d'une nouvelle commande supprime l'ancienne
+- Si le prix d'un produit est modifié, ça ne change rien à la commande
+- Vérifier que l'id n'existe pas déjà
+- Date de création = celle d'aujourd'hui
+- Une commande contient un id, une date de création, le produit, sa quantité et le prix total
 
-  - Exemple 1/ Scénario 1 : ajout d'un produit réussi sur une nouvelle commande
+  - Exemple 1/ Scénario 1 : création réussie d'une commande
 
-    - Étant donné je suis identifié en tant qu’utilisateur
-    - Et qu'il n'y a pas de commande existante
-    - Quand j'ajoute un produit identifié à l'id 1, une quantité 1 et un prix à 100
-    - Alors une nouvelle commande doit être créée avec avec une ligne contenant le produit 1, la quantité à 1 et un prix à 100
+    - Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 50€
+    - Et qu'il n'y a aucune commande enregistrée
+    - Quand je crée une commande avec le produit d'identifiant 1 et une quantité de 2
+    - Alors la commande doit être créée avec succès
+    - Et le prix total doit être de 100€
+    - Et la date de création doit être celle d'aujourd'hui
 
-    - Exemple 2/ Scénario 2 : ajout d'un produit réussi sur une commande existante
-      - Étant donné je suis identifié en tant qu’utilisateur
-      - Et qu'il y a déjà une commmande existante avec une ligne contenant le produit 1 et une quantité à 1
-      - Quand j'ajoute le produit 1 avec une quantité à 1
-      - Alors la commande doit contenir une ligne avec le produit 1, la quantité à 2 et un prix total à 200
+  - Exemple 2/ Scénario 2 : création échouée, prix total dépasse 200€
 
-- Créer les exemples / scénarios pour la US 3 «créer une commande»
-- implémenter chaque scénario dans le code, en respectant la screaming archi,
-- les vertical slices et le monolithe modulaire, avec un test unitaire par scénario
+    - Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 120€
+    - Et qu'il n'y a aucune commande enregistrée
+    - Quand je crée une commande avec le produit d'identifiant 1 et une quantité de 3
+    - Alors une erreur doit être envoyée "Le prix total de la commande ne peut pas dépasser 200€"
+
+  - Exemple 3/ Scénario 3 : création échouée, quantité supérieure ou égale à 4
+
+    - Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 30€
+    - Et qu'il n'y a aucune commande enregistrée
+    - Quand je crée une commande avec le produit d'identifiant 1 et une quantité de 5
+    - Alors une erreur doit être envoyée "La quantité ne peut pas dépasser 3"
+
+  - Exemple 4/ Scénario 4 : création échouée, quantité nulle ou négative
+
+    - Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 50€
+    - Et qu'il n'y a aucune commande enregistrée
+    - Quand je crée une commande avec le produit d'identifiant 1 et une quantité de 0
+    - Alors une erreur doit être envoyée "La quantité doit être supérieure à 0"
+
+  - Exemple 5/ Scénario 5 : création échouée, produit inexistant
+
+    - Étant donné qu'aucun produit n'existe avec l'identifiant 999
+    - Et qu'il n'y a aucune commande enregistrée
+    - Quand je crée une commande avec le produit d'identifiant 999 et une quantité de 2
+    - Alors une erreur doit être envoyée "Le produit n'existe pas"
+
+  - Exemple 6/ Scénario 6 : remplacement d'une commande existante
+
+    - Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 30€
+    - Et qu'un produit existe avec l'identifiant 2, titre "PS5", description "console Sony" et prix 40€
+    - Et qu'une commande existe déjà avec le produit 1, quantité 2 et prix total 60€
+    - Quand je crée une nouvelle commande avec le produit d'identifiant 2 et une quantité de 3
+    - Alors l'ancienne commande doit être supprimée
+    - Et la nouvelle commande doit être créée avec le produit 2, quantité 3 et prix total 120€
+
+  - Exemple 7/ Scénario 7 : modification du prix du produit n'affecte pas la commande
+
+    - Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 50€
+    - Et qu'une commande existe avec le produit 1, quantité 2 et prix total 100€
+    - Quand je modifie le prix du produit 1 à 70€
+    - Alors le prix total de la commande doit rester à 100€
+    - Et le produit dans la base de données doit avoir un prix de 70€
