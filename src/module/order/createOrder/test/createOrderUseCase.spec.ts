@@ -1,14 +1,30 @@
 import { describe, expect, test } from "@jest/globals";
+import { Product } from "../../../product/Product";
+import { Order } from "../../Order";
 import { CreateOrderRepository } from "../createOrderRepository";
 import { CreateOrderUseCase } from "../createOrderUseCase";
-import { Order } from "../../Order";
-import { Product } from "../../../product/Product";
 
 class CreateOrderDummyRepository implements CreateOrderRepository {
-  private productPrice: number;
+  private products: Product[] = [];
 
-  constructor(productPrice: number = 50) {
-    this.productPrice = productPrice;
+  constructor() {
+    const product1 = new Product({
+      title: "Switch 2",
+      description: "nouvelle console",
+      price: 120,
+    });
+
+    product1.id = 1;
+
+    const product2 = new Product({
+      title: "PS5",
+      description: "console Sony",
+      price: 40,
+    });
+
+    product2.id = 2;
+
+    this.products.push(product1, product2);
   }
 
   async save(order: Order): Promise<void> {
@@ -16,22 +32,7 @@ class CreateOrderDummyRepository implements CreateOrderRepository {
   }
 
   async findProductById(productId: number): Promise<Product | null> {
-    // Retourne un produit mock pour les tests
-    if (productId === 1) {
-      return new Product({
-        title: "Switch 2",
-        description: "nouvelle console",
-        price: this.productPrice,
-      });
-    }
-    if (productId === 2) {
-      return new Product({
-        title: "PS5",
-        description: "console Sony",
-        price: 40,
-      });
-    }
-    return null;
+    return this.products.find((p) => p.id === productId) || null;
   }
 
   async deleteAllOrders(): Promise<void> {
@@ -41,7 +42,7 @@ class CreateOrderDummyRepository implements CreateOrderRepository {
 
 describe("US-3 : Créer une commande avec des produits", () => {
   test("Scénario 1 : création réussie d'une commande", async () => {
-    // Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 50€
+    // Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 40€
     // Et qu'il n'y a aucune commande enregistrée
     const createOrderRepository = new CreateOrderDummyRepository();
     const createOrderUseCase = new CreateOrderUseCase(createOrderRepository);
@@ -49,7 +50,7 @@ describe("US-3 : Créer une commande avec des produits", () => {
     await expect(
       // Quand je crée une commande avec le produit d'identifiant 1 et une quantité de 2
       createOrderUseCase.execute({
-        productId: 1,
+        productId: 2,
         quantity: 2,
       })
       // Alors la commande doit être créée avec succès
@@ -59,7 +60,7 @@ describe("US-3 : Créer une commande avec des produits", () => {
   test("Scénario 2 : création échouée, prix total dépasse 200€", async () => {
     // Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 120€
     // Et qu'il n'y a aucune commande enregistrée
-    const createOrderRepository = new CreateOrderDummyRepository(120);
+    const createOrderRepository = new CreateOrderDummyRepository();
     const createOrderUseCase = new CreateOrderUseCase(createOrderRepository);
 
     await expect(
@@ -75,7 +76,7 @@ describe("US-3 : Créer une commande avec des produits", () => {
   test("Scénario 3 : création échouée, quantité supérieure ou égale à 4", async () => {
     // Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 30€
     // Et qu'il n'y a aucune commande enregistrée
-    const createOrderRepository = new CreateOrderDummyRepository(30);
+    const createOrderRepository = new CreateOrderDummyRepository();
     const createOrderUseCase = new CreateOrderUseCase(createOrderRepository);
 
     await expect(
@@ -124,7 +125,7 @@ describe("US-3 : Créer une commande avec des produits", () => {
     // Étant donné qu'un produit existe avec l'identifiant 1, titre "Switch 2", description "nouvelle console" et prix 30€
     // Et qu'un produit existe avec l'identifiant 2, titre "PS5", description "console Sony" et prix 40€
     // Et qu'une commande existe déjà avec le produit 1, quantité 2 et prix total 60€
-    const createOrderRepository = new CreateOrderDummyRepository(30);
+    const createOrderRepository = new CreateOrderDummyRepository();
     const createOrderUseCase = new CreateOrderUseCase(createOrderRepository);
 
     await expect(
